@@ -8,7 +8,14 @@ class MoviesController < ApplicationController
 
   def index
     @hilite = 'hilite'
-    @movies = Movie.order(params[:sort_key]).find_all
+    @all_ratings = Movie.ratings
+
+    if params[:ratings]
+      @ratings = params[:ratings].keys
+      @movies = Movie.order(params[:sort_key]).find_all_by_rating(@ratings)
+    else
+      @movies = Movie.order(params[:sort_key]).find_all
+    end
   end
 
   def new
@@ -38,5 +45,4 @@ class MoviesController < ApplicationController
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
   end
-
 end
