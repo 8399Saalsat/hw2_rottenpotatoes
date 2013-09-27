@@ -10,6 +10,42 @@ class MoviesController < ApplicationController
     @hilite = 'hilite'
     @all_ratings = Movie.ratings
 
+    if params[:commit] then
+      @ratings = params[:ratings]
+      @sort_key = params[:sort_key]
+      if @ratings
+        session[:ratings] = @ratings
+      else
+        @ratings = session[:ratings]
+        @sort_key = session[:sort_key]
+        redirect = true
+      end
+    else
+      @sort_key = params[:sort_key] || session[:sort_key]
+      @ratings = params[:ratings]
+      if !@ratings then
+        if session[:ratings] then
+          redirect = true
+          @ratings = session[:ratings]
+        else
+          @ratings = {}
+        end
+      else
+        session[:ratings] = @ratings
+      end
+    end 
+
+    if session[:sort_key] != @sort_key then
+      redirect = true
+      session[:sort_key] = @sort_key
+    end
+    
+    if redirect then
+      flash.keep
+      redirect_to movies_path(:sort_key => @sort_key, :ratings => @ratings)
+      return
+    end   
+	
     if params[:ratings]
       @ratings = params[:ratings].keys
       @movies = Movie.order(params[:sort_key]).find_all_by_rating(@ratings)
